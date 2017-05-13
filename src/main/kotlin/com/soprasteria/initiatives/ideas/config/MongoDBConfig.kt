@@ -1,5 +1,6 @@
 package com.soprasteria.initiatives.ideas.config
 
+import com.mongodb.ConnectionString
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.async.client.MongoClientSettings
@@ -16,7 +17,9 @@ import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguratio
 @EnableConfigurationProperties(MongoProperties::class)
 class MongoDBConfig(val mongoProperties: MongoProperties, val profileConfig: ProfileConfig) : AbstractReactiveMongoConfiguration() {
 
-    override fun mongoClient() = if (profileConfig.isActive(Profiles.CLOUD)) MongoClients.create(settings()) else MongoClients.create()
+    override fun mongoClient() = if (profileConfig.isActive(Profiles.CLOUD)) MongoClients.create(settings())
+    else if (profileConfig.isActive(Profiles.DOCKER)) MongoClients.create(ConnectionString("mongodb://${mongoProperties.host}"))
+    else MongoClients.create()
 
     override fun getDatabaseName() = mongoProperties.database
 

@@ -1,0 +1,17 @@
+version: '2'
+services:
+  mongodb:
+    image: mongo:3.4
+    hostname: mongodb
+    ports:
+      - 27017:27017
+  initiatives-ideas:
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    build:
+      dockerfile: ./src/main/docker/Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+    links:
+      - mongodb

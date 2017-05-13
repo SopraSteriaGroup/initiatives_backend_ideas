@@ -2,3 +2,20 @@ spring:
   data:
     mongodb:
       database: initiatives_ideas
+
+---
+
+spring:
+  profiles: docker
+  data:
+    mongodb:
+      database: initiatives_ideas
+      host: mongodb
+
+---
+
+spring:
+  profiles: cloud
+  data:
+    mongodb:
+      database: initiatives_ideas
