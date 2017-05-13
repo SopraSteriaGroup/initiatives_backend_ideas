@@ -25,6 +25,14 @@ class IdeaServiceTest {
     fun setUp() {
         ideaRepository.deleteAll().block()
         ideaRepository.insert(createIdea(defaultName)).block()
+        ideaRepository.insert(createIdea("$defaultName 2")).block()
+    }
+
+    @Test
+    fun `should find all ideas`() {
+        ideaService.findAll().test()
+                .expectNextCount(2)
+                .verifyComplete()
     }
 
     @Test

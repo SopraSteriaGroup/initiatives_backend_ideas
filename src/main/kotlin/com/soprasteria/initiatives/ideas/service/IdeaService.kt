@@ -6,6 +6,7 @@ import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
 
@@ -13,6 +14,12 @@ import reactor.core.publisher.toMono
 class IdeaService(private val ideaRepository: IdeaRepository) {
 
     val logger = LoggerFactory.getLogger(javaClass.simpleName)
+
+    fun findAll(): Flux<Idea> {
+        logger.debug("Searching all ideas")
+        return ideaRepository.findAll()
+                .doOnNext { logger.debug("All ideas retrieved") }
+    }
 
     fun create(idea: Idea): Mono<Idea> {
         logger.info("Creating idea {}")
