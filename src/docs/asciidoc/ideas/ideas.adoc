@@ -1,0 +1,25 @@
+[[resources-ideas]]
+== Ideas
+
+The ideas resource returns ideas for various inputs
+
+[[ideas-list]]
+=== Finding all ideas
+
+ A `GET` request with no parameters will return a list of potential ideas
+
+==== Example request
+
+include::{snippets}/findAllIdeas/curl-request.adoc[]
+
+or
+
+include::{snippets}/findAllIdeas/http-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/findAllIdeas/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/findAllIdeas/http-response.adoc[]
