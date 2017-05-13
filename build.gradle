@@ -5,6 +5,7 @@ buildscript {
 		jacksonVersion = '2.8.8'
 		reactorVersion = '3.0.7.RELEASE'
 		reactorKotlinVersion = '1.0.0.M2'
+		restAssuredVersion = '3.0.3'
 	}
 	repositories {
 		mavenCentral()
@@ -51,4 +52,5 @@ dependencies {
 	compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor.addons:reactor-test')
+	testCompile("io.rest-assured:rest-assured:${restAssuredVersion}")
 }
