@@ -2,6 +2,9 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 
+### Static ###
+src/main/resources/static/html5/
+
 ### STS ###
 .apt_generated
 .classpath
