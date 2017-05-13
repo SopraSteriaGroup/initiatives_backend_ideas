@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: test
+  data:
+    mongodb:
+      database: initiatives_ideas_test
