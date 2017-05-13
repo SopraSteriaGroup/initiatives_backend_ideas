@@ -20,6 +20,7 @@ import org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
+import org.springframework.restdocs.restassured3.operation.preprocess.RestAssuredPreprocessors.modifyUris
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
@@ -45,7 +46,7 @@ open class IdeasAPITests {
     fun `should publish all ideas`() {
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .filter(document("findAllIdeas", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
+                .filter(document("findAllIdeas", preprocessRequest(modifyUris().port(8080)), preprocessResponse(prettyPrint()),
                         responseFields(fieldWithPath("[]").description("An array of ideas"))
                                 .andWithPrefix("[].", ideaDTOFields().apply { addAll(applyPathPrefix("contact.", contactDTOFields())) })
                 ))
