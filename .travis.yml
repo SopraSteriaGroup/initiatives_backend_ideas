@@ -13,3 +13,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+ notifications:
+    slack: ssg-initiatives:hE8BVpAMys1AzTYbviUnEzQt
+    email: false
