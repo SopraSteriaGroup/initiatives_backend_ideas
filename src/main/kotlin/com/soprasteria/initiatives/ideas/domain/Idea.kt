@@ -24,4 +24,5 @@ data class Idea(@Id val id: ObjectId,
     override fun hashCode(): Int {
         return name.hashCode()
     }
+
 }
