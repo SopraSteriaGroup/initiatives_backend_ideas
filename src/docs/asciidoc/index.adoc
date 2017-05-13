@@ -93,7 +93,7 @@ that describes the problem. The error object has the following structure:
 
 For example, a request that attempts to delete on the greetings endpoint will produce a `405 Method Not Allowed` response:
 
-include::{snippets}/error-example/http-response.adoc[]
+//include::{snippets}/error-example/http-response.adoc[]
 
 [[resources]]
 = Resources
