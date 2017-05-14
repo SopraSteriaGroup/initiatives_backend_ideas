@@ -23,3 +23,28 @@ include::{snippets}/findAllIdeas/response-fields.adoc[]
 ==== Example response
 
 include::{snippets}/findAllIdeas/http-response.adoc[]
+
+[[ideas-creation]]
+=== Create new idea
+
+ A `POST` request with a body containing the idea to create will return the newly created idea
+
+==== Request structure
+
+include::{snippets}/createIdea/request-fields.adoc[]
+
+==== Example request
+
+include::{snippets}/createIdea/curl-request.adoc[]
+
+or
+
+include::{snippets}/createIdea/http-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/createIdea/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/createIdea/http-response.adoc[]

@@ -17,6 +17,7 @@ class RouteConfig {
         "/api".and(accept(MediaType.APPLICATION_JSON)).nest {
             "/ideas".nest {
                 GET("/", ideasAPI::findAll)
+                POST("/", ideasAPI::create)
             }
         }
     }
