@@ -88,7 +88,7 @@ jar {
     baseName = 'initiatives-ideas'
     version =  version
     from ("${asciidoctor.outputDir}/html5") {
-        into 'static/html5'
+        into 'static/docs'
     }
 }
 
