@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner
 open class IdeasAPITests {
 
     val defaultName = "setup"
+    val baseUrl = "/api/ideas"
     lateinit var spec: RequestSpecification
     @Rule @JvmField val restDocumentation = JUnitRestDocumentation()
     @LocalServerPort var port: Int = 0
@@ -55,7 +56,7 @@ open class IdeasAPITests {
                                 .andWithPrefix("[].", ideaDTOFieldsWithId().apply {
                                     addAll(applyPathPrefix("contact.", contactDTOFields()))
                                 })))
-                .`when`().get("/api/ideas")
+                .`when`().get(baseUrl)
                 .then().statusCode(HttpStatus.OK.value()).apply(validateMultipleIdeas())
     }
 
@@ -73,13 +74,20 @@ open class IdeasAPITests {
                         responseFields(ideaDTOFieldsWithId().apply {
                             addAll(applyPathPrefix("contact.", contactDTOFields()))
                         })))
-                .`when`().post("/api/ideas")
+                .`when`().post(baseUrl)
                 .then().statusCode(HttpStatus.OK.value()).apply(validateSimpleIdea(name))
     }
 
     @Test
     fun `should not create new idea because conflicting keys`() {
-
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(createIdeaRequestBody(defaultName))
+                .filter(document("conflictCreateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()),
+                        preprocessResponse(prettyPrint()), responseFields(errorDTOFields())))
+                .`when`().post(baseUrl)
+                .then().statusCode(HttpStatus.CONFLICT.value())
     }
 
     private fun validateSimpleIdea(name: String): ValidatableResponse.() -> Unit {
@@ -139,6 +147,12 @@ open class IdeasAPITests {
             fieldWithPath("slack").type(String::class.java).description("The idea's slack URL"),
             fieldWithPath("github").type(String::class.java).description("The idea's github URL"),
             fieldWithPath("trello").type(String::class.java).description("The idea's trello URL")
+    )
+
+    private fun errorDTOFields() = mutableListOf(
+            fieldWithPath("message").type(String::class.java).description("The error message"),
+            fieldWithPath("status").type(Int::class.java).description("The HTTP status code"),
+            fieldWithPath("reason").type(String::class.java).description("The HTTP status reason")
     )
 
     private fun mailField() = fieldWithPath("mail").type(String::class.java).description("The contact's mail address")

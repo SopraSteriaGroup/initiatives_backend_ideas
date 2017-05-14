@@ -75,25 +75,17 @@ If authentication credentials were provided in the request, the server considers
 
 For more status codes, see the https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html[w3 standard]
 
-////
-[[overview-headers]]
-== Headers
-
-Every response has the following header(s):
-
-//include::{snippets}/headers-example/response-headers.adoc[]
-////
 [[overview-errors]]
 == Errors
 
-Whenever an error response (status code >= 400) is returned, the body will contain a JSON object
-that describes the problem. The error object has the following structure:
+Whenever an error response (status code >= 400) is returned, the body will contain a JSON object that describes the problem.
+The error object has the following structure:
 
-//include::{snippets}/error-example/response-fields.adoc[]
+include::{snippets}/conflictCreateIdea/response-fields.adoc[]
 
-For example, a request that attempts to delete on the greetings endpoint will produce a `405 Method Not Allowed` response:
+For example, a request that attempts to create an Idea with a name that exists already will produce a `409 Conflict` response:
 
-//include::{snippets}/error-example/http-response.adoc[]
+include::{snippets}/conflictCreateIdea/http-response.adoc[]
 
 [[resources]]
 = Resources
