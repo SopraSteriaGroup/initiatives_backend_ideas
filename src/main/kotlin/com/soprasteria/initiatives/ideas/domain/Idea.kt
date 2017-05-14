@@ -7,9 +7,9 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
 data class Idea(@Id val id: ObjectId,
-                @NotBlank val name: String,
-                @NotBlank val pitch: String,
-                @NotBlank val category: String, //TODO to become DBRef or embedded object
+                @field:NotBlank val name: String,
+                @field:NotBlank val pitch: String,
+                @field:NotBlank val category: String, //TODO to become DBRef or embedded object
                 val logo: String,
                 val progress: IdeaProgress,
                 val likes: Int,

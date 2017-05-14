@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType
 import org.springframework.restdocs.JUnitRestDocumentation
 import org.springframework.restdocs.operation.preprocess.Preprocessors.*
@@ -57,7 +58,7 @@ open class IdeasAPITests {
                                     addAll(applyPathPrefix("contact.", contactDTOFields()))
                                 })))
                 .`when`().get(baseUrl)
-                .then().statusCode(HttpStatus.OK.value()).apply(validateMultipleIdeas())
+                .then().statusCode(OK.value()).apply(validateMultipleIdeas())
     }
 
     @Test
@@ -75,7 +76,7 @@ open class IdeasAPITests {
                             addAll(applyPathPrefix("contact.", contactDTOFields()))
                         })))
                 .`when`().post(baseUrl)
-                .then().statusCode(HttpStatus.OK.value()).apply(validateSimpleIdea(name))
+                .then().statusCode(OK.value()).apply(validateSimpleIdea(name))
     }
 
     @Test
@@ -87,7 +88,27 @@ open class IdeasAPITests {
                 .filter(document("conflictCreateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()),
                         preprocessResponse(prettyPrint()), responseFields(errorDTOFields())))
                 .`when`().post(baseUrl)
-                .then().statusCode(HttpStatus.CONFLICT.value())
+                .then().statusCode(CONFLICT.value()).apply { validateError(CONFLICT) }
+    }
+
+    @Test
+    fun `should not create new idea because name empty`() {
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(createIdeaRequestBody(""))
+                .`when`().post(baseUrl)
+                .then().statusCode(BAD_REQUEST.value()).apply { validateError(BAD_REQUEST) }
+    }
+
+    @Test
+    fun `should not create new idea because mail not well formatted`() {
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(createIdeaRequestBody("some name", "some mail"))
+                .`when`().post(baseUrl)
+                .then().statusCode(BAD_REQUEST.value()).apply { validateError(BAD_REQUEST) }
     }
 
     private fun validateSimpleIdea(name: String): ValidatableResponse.() -> Unit {
@@ -124,6 +145,14 @@ open class IdeasAPITests {
         }
     }
 
+    private fun validateError(status: HttpStatus): ValidatableResponse.() -> Unit {
+        return {
+            body("message", notNullValue())
+            body("status", equalTo(status.value()))
+            body("reason", equalTo(status.reasonPhrase))
+        }
+    }
+
     private fun minIdeaDTOFields() = mutableListOf(
             fieldWithPath("name").type(String::class.java).description("The idea's name"),
             fieldWithPath("pitch").type(String::class.java).description("The idea's pitch explaining what this idea is about"),
@@ -157,8 +186,8 @@ open class IdeasAPITests {
 
     private fun mailField() = fieldWithPath("mail").type(String::class.java).description("The contact's mail address")
 
-    private fun createIdeaRequestBody(name: String) = ObjectMapper().writeValueAsString(
-            IdeaDTOTest(name, "$name pitch", "cat", "$name logo", contact = ContactDTOTest("jntakpe@mail.com")))
+    private fun createIdeaRequestBody(name: String, mail: String = "jntakpe@mail.com") = ObjectMapper().writeValueAsString(
+            IdeaDTOTest(name, "$name pitch", "cat", "$name logo", contact = ContactDTOTest(mail)))
 
     data class IdeaDTOTest(val name: String, val pitch: String, val category: String, val logo: String, val contact: ContactDTOTest)
 
