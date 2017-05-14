@@ -83,12 +83,12 @@ asciidoctor {
 	attributes 'snippets': snippetsDir
 }
 
-jar {
+bootJar {
     dependsOn asciidoctor
     baseName = 'initiatives-ideas'
     version =  version
     from ("${asciidoctor.outputDir}/html5") {
-        into 'static/docs'
+        into 'static/html5'
     }
 }
 
