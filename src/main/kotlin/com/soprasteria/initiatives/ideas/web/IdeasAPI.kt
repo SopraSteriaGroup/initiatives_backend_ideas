@@ -1,10 +1,7 @@
 package com.soprasteria.initiatives.ideas.web
 
 import com.soprasteria.initiatives.ideas.dto.IdeaDTO
-import com.soprasteria.initiatives.ideas.mapping.toDTO
-import com.soprasteria.initiatives.ideas.mapping.toIdea
-import com.soprasteria.initiatives.ideas.mapping.toMono
-import com.soprasteria.initiatives.ideas.mapping.toResponse
+import com.soprasteria.initiatives.ideas.mapping.*
 import com.soprasteria.initiatives.ideas.service.IdeaService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -20,6 +17,12 @@ class IdeasAPI(private val ideaService: IdeaService, private val validator: Vali
 
     fun create(req: ServerRequest) = validateIdea(req)
             .flatMap { ideaService.create(it) }
+            .map { it.toDTO() }
+            .flatMap { ok().syncBody(it) }
+            .onErrorResume { it.toResponse() }
+
+    fun update(req: ServerRequest) = validateIdea(req)
+            .flatMap { ideaService.update(it, req.pathVariable("id").toId()) }
             .map { it.toDTO() }
             .flatMap { ok().syncBody(it) }
             .onErrorResume { it.toResponse() }

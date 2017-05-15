@@ -2,6 +2,7 @@ package com.soprasteria.initiatives.ideas.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.soprasteria.initiatives.ideas.domain.IdeaProgress
+import com.soprasteria.initiatives.ideas.mapping.toDTO
 import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import com.soprasteria.initiatives.ideas.utils.createIdea
 import io.restassured.RestAssured
@@ -9,6 +10,7 @@ import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.response.ValidatableResponse
 import io.restassured.specification.RequestSpecification
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.CoreMatchers.*
 import org.junit.Before
 import org.junit.Rule
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType
 import org.springframework.restdocs.JUnitRestDocumentation
 import org.springframework.restdocs.operation.preprocess.Preprocessors.*
+import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
@@ -54,9 +57,7 @@ open class IdeasAPITests {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .filter(document("findAllIdeas", preprocessRequest(modifyUris().port(8080)), preprocessResponse(prettyPrint()),
                         responseFields(fieldWithPath("[]").description("An array of ideas"))
-                                .andWithPrefix("[].", ideaDTOFieldsWithId().apply {
-                                    addAll(applyPathPrefix("contact.", contactDTOFields()))
-                                })))
+                                .andWithPrefix("[].", fullIdeaDTO())))
                 .`when`().get(baseUrl)
                 .then().statusCode(OK.value()).apply(validateMultipleIdeas())
     }
@@ -72,15 +73,13 @@ open class IdeasAPITests {
                         requestFields(minIdeaDTOFields().apply {
                             addAll(applyPathPrefix("contact.", listOf(mailField())))
                         }),
-                        responseFields(ideaDTOFieldsWithId().apply {
-                            addAll(applyPathPrefix("contact.", contactDTOFields()))
-                        })))
+                        responseFields(fullIdeaDTO())))
                 .`when`().post(baseUrl)
                 .then().statusCode(OK.value()).apply(validateSimpleIdea(name))
     }
 
     @Test
-    fun `should not create new idea because conflicting keys`() {
+    fun `should not create new idea because conflicting names`() {
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -109,6 +108,43 @@ open class IdeasAPITests {
                 .body(createIdeaRequestBody("some name", "some mail"))
                 .`when`().post(baseUrl)
                 .then().statusCode(BAD_REQUEST.value()).apply { validateError(BAD_REQUEST) }
+    }
+
+    @Test
+    fun `should update idea`() {
+        val updatedName = "updated name"
+        val idea = ideaRepository.findAll().blockFirst()
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(idea.copy(name = updatedName, pitch = "$updatedName pitch", logo = "$updatedName logo").toDTO())
+                .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        requestFields(fullIdeaDTO()), responseFields(fullIdeaDTO())))
+                .`when`().put("$baseUrl/{id}", idea.id.toString())
+                .then().statusCode(OK.value()).apply(validateSimpleIdea(updatedName))
+    }
+
+    @Test
+    fun `should not update idea because conflicting names`() {
+        val ideas = ideaRepository.findAll().collectList().block()
+        assertThat(ideas.size).isGreaterThanOrEqualTo(2)
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(ideas[0].toDTO())
+                .`when`().put("$baseUrl/{id}", ideas[1].id.toString())
+                .then().statusCode(CONFLICT.value())
+    }
+
+    @Test
+    fun `should not update idea because name is empty`() {
+        val idea = ideaRepository.findAll().blockFirst()
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .body(idea.copy(name = "").toDTO())
+                .`when`().put("$baseUrl/{id}", idea.id.toString())
+                .then().statusCode(BAD_REQUEST.value())
     }
 
     private fun validateSimpleIdea(name: String): ValidatableResponse.() -> Unit {
@@ -183,6 +219,12 @@ open class IdeasAPITests {
             fieldWithPath("status").type(Int::class.java).description("The HTTP status code"),
             fieldWithPath("reason").type(String::class.java).description("The HTTP status reason")
     )
+
+    private fun fullIdeaDTO(): MutableList<FieldDescriptor> {
+        return ideaDTOFieldsWithId().apply {
+            addAll(applyPathPrefix("contact.", contactDTOFields()))
+        }
+    }
 
     private fun mailField() = fieldWithPath("mail").type(String::class.java).description("The contact's mail address")
 

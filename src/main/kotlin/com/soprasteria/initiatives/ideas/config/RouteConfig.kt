@@ -18,6 +18,7 @@ class RouteConfig {
             "/ideas".nest {
                 GET("/", ideasAPI::findAll)
                 POST("/", ideasAPI::create)
+                PUT("/{id}", ideasAPI::update)
             }
         }
     }
