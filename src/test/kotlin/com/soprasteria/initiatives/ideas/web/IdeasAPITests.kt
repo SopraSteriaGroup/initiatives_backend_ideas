@@ -75,7 +75,7 @@ open class IdeasAPITests {
                         }),
                         responseFields(fullIdeaDTO())))
                 .`when`().post(baseUrl)
-                .then().statusCode(OK.value()).apply(validateSimpleIdea(name))
+                .then().statusCode(CREATED.value()).apply(validateSimpleIdea(name))
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.soprasteria.initiatives.ideas.mapping.*
 import com.soprasteria.initiatives.ideas.service.IdeaService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.body
 import org.springframework.web.reactive.function.server.bodyToMono
@@ -18,7 +19,7 @@ class IdeasAPI(private val ideaService: IdeaService, private val validator: Vali
     fun create(req: ServerRequest) = validateIdea(req)
             .flatMap { ideaService.create(it) }
             .map { it.toDTO() }
-            .flatMap { ok().syncBody(it) }
+            .flatMap { created(req.uri().resolve("/${it.id}")).syncBody(it) }
             .onErrorResume { it.toResponse() }
 
     fun update(req: ServerRequest) = validateIdea(req)
