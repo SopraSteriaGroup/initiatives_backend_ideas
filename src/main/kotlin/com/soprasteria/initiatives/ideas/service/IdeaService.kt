@@ -28,6 +28,13 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
                 .doOnNext { logger.info("Idea {} successfully created", it.name) }
     }
 
+    fun update(idea: Idea, id: ObjectId): Mono<Idea> {
+        logger.info("Updating idea {}")
+        return verifyNameAvailable(idea.name, id)
+                .flatMap { ideaRepository.save(idea) }
+                .doOnNext { logger.info("Idea {} successfully updated", it.name) }
+    }
+
     fun verifyNameAvailable(name: String, id: ObjectId? = null): Mono<Boolean> {
         logger.debug("Checking that name {} is available", name)
         return findByName(name)

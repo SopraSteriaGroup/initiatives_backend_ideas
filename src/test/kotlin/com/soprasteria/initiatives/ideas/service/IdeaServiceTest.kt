@@ -53,6 +53,40 @@ class IdeaServiceTest {
     }
 
     @Test
+    fun `should update idea`() {
+        val initCount = ideaRepository.count().block()
+        val first = ideaRepository.findAll().blockFirst()
+        val updatedName = "updated name"
+        ideaService.update(first.copy(name = updatedName), first.id).test()
+                .expectSubscription()
+                .consumeNextWith {
+                    assertThat(it).isNotNull()
+                    assertThat(it.name).isEqualTo(updatedName)
+                }
+                .then { assertThat(ideaRepository.count().block()).isEqualTo(initCount) }
+                .verifyComplete()
+    }
+
+    @Test
+    fun `should update idea when duplicate name but same id`() {
+        val first = ideaRepository.findAll().blockFirst()
+        val updatedPitch = "updated pitch"
+        ideaService.update(first.copy(pitch = updatedPitch), first.id).test()
+                .expectSubscription()
+                .consumeNextWith { assertThat(it.pitch).isEqualTo(updatedPitch) }
+                .verifyComplete()
+    }
+
+    @Test
+    fun `should update idea when duplicate name when id differs`() {
+        val ideas = ideaRepository.findAll().collectList().block()
+        assertThat(ideas.size).isGreaterThanOrEqualTo(2)
+        ideaService.update(ideas[0].copy(name = ideas[1].name), ideas[0].id).test()
+                .expectSubscription()
+                .verifyError(ConflictKeyException::class.java)
+    }
+
+    @Test
     fun `should accept name because no duplicate found`() {
         ideaService.verifyNameAvailable("no duplicate").test()
                 .expectSubscription()
