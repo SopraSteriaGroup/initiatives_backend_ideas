@@ -114,14 +114,16 @@ open class IdeasAPITests {
     fun `should update idea`() {
         val updatedName = "updated name"
         val idea = ideaRepository.findAll().blockFirst()
+        val updatedContact = idea.contact.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
+        val updatedIdea = idea.copy(name = updatedName, likes = 10, progress = IdeaProgress.STARTED, contact = updatedContact)
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .body(idea.copy(name = updatedName, pitch = "$updatedName pitch", logo = "$updatedName logo").toDTO())
+                .body(updatedIdea.toDTO())
                 .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
                         requestFields(fullIdeaDTO()), responseFields(fullIdeaDTO())))
                 .`when`().put("$baseUrl/{id}", idea.id.toString())
-                .then().statusCode(OK.value()).apply(validateSimpleIdea(updatedName))
+                .then().statusCode(OK.value()).apply(validateUpdatedIdea(idea.name))
     }
 
     @Test
@@ -161,6 +163,23 @@ open class IdeasAPITests {
             body("contact.github", nullValue())
             body("contact.trello", nullValue())
             body("contact.website", nullValue())
+        }
+    }
+
+    private fun validateUpdatedIdea(oldName: String): ValidatableResponse.() -> Unit {
+        return {
+            body("id", notNullValue())
+            body("name", equalTo("updated name"))
+            body("pitch", equalTo("$oldName pitch"))
+            body("category", equalTo("cat"))
+            body("logo", equalTo("$oldName logo"))
+            body("progress", equalTo(IdeaProgress.STARTED.name))
+            body("likes", equalTo(10))
+            body("contact.mail", equalTo("jntakpe@mail.com"))
+            body("contact.slack", nullValue())
+            body("contact.github", equalTo("http://github.com/jntakpe"))
+            body("contact.trello", nullValue())
+            body("contact.website", equalTo("updated.site.com"))
         }
     }
 

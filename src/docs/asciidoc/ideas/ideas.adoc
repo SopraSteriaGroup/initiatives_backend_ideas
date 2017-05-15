@@ -48,3 +48,28 @@ include::{snippets}/createIdea/response-fields.adoc[]
 ==== Example response
 
 include::{snippets}/createIdea/http-response.adoc[]
+
+[[ideas-updating]]
+=== Update idea
+
+ A `PUT` request including the idea's id within path and with a body containing the idea to update will return the updated idea
+
+==== Request structure
+
+include::{snippets}/updateIdea/request-fields.adoc[]
+
+==== Example request
+
+include::{snippets}/updateIdea/curl-request.adoc[]
+
+or
+
+include::{snippets}/updateIdea/http-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/updateIdea/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/updateIdea/http-response.adoc[]
