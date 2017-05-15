@@ -32,4 +32,4 @@ Démarrer *MongoDB* avec la commande : ``mongod``
 
 Après avoir installé Gradle, à la racine du projet, exécutez la commande : ``gradle bootRun``.
  
-L'application devrait démarrer en affichant dans la CLI un message contenant : ``Started InitiativesIdeasApplicationKt in X seconds`
+L'application devrait démarrer en affichant dans la CLI un message contenant : ``Started InitiativesIdeasApplicationKt in X seconds``
