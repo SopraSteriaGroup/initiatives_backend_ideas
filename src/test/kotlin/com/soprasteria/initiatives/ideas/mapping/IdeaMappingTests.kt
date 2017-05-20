@@ -29,17 +29,6 @@ class IdeaMappingTests {
     }
 
     @Test
-    fun `should map null dto to empty comtact`() {
-        val contact: IdeaContactDTO? = null
-        val empty = contact.toContact()
-        assertThat(empty).isNotNull()
-        assertThat(empty.github).isNull()
-        assertThat(empty.slack).isNull()
-        assertThat(empty.trello).isNull()
-        assertThat(empty.website).isNull()
-    }
-
-    @Test
     fun `should map dto to new idea`() {
         val name = "name"
         val pitch = "pitch"
@@ -55,7 +44,7 @@ class IdeaMappingTests {
         assertThat(idea.progress).isEqualTo(IdeaProgress.NOT_STARTED)
         assertThat(idea.likes).isEqualTo(0)
         assertThat(idea.founder).isNotNull()
-        assertThat(idea.contact).isNull()
+        assertThat(idea.contact).isNotNull()
     }
 
     @Test

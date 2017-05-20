@@ -8,10 +8,10 @@ import com.soprasteria.initiatives.ideas.dto.IdeaDTO
 import com.soprasteria.initiatives.ideas.dto.IdeaDetailDTO
 import com.soprasteria.initiatives.ideas.dto.MemberDTO
 
-fun IdeaContactDTO?.toContact() = IdeaContact(this?.website, this?.slack, this?.github, this?.trello)
+fun IdeaContactDTO.toContact() = IdeaContact(this.website, this.slack, this.github, this.trello)
 
 fun IdeaDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
-        founder.toMember(), mutableListOf(), null)
+        founder.toMember(), mutableListOf())
 
 fun IdeaDetailDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress,
         this.likes, founder.toMember(), mutableListOf(), this.contact.toContact())
@@ -23,6 +23,6 @@ fun IdeaContact.toDTO() = IdeaContactDTO(this.website, this.slack, this.github, 
 fun Idea.toDTO() = IdeaDTO(this.id.toString(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes)
 
 fun Idea.toDetailDTO() = IdeaDetailDTO(this.id.toString(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
-        founder.toDTO(), members.map(Member::toDTO).toMutableList(), contact?.toDTO())
+        founder.toDTO(), members.map(Member::toDTO).toMutableList(), contact.toDTO())
 
 fun Member.toDTO() = MemberDTO(this.username, this.email, this.firstName, this.lastName, this.avatar)

@@ -14,7 +14,7 @@ data class Idea(val id: ObjectId,
                 val likes: Int,
                 val founder: Member,
                 val members: MutableList<Member>,
-                val contact: IdeaContact?) {
+                val contact: IdeaContact = IdeaContact(null, null, null, null)) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

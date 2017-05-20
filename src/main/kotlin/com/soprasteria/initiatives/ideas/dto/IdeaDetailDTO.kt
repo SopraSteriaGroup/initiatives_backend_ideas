@@ -11,4 +11,4 @@ data class IdeaDetailDTO(var id: String,
                          val likes: Int,
                          val founder: MemberDTO,
                          val members: List<MemberDTO>,
-                         val contact: IdeaContactDTO?)
+                         val contact: IdeaContactDTO)
