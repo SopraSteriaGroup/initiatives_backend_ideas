@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import reactor.core.publisher.test
+import javax.validation.ValidationException
 
 @SpringBootTest
 @RunWith(SpringRunner::class)
@@ -50,6 +51,13 @@ class IdeaServiceTest {
         ideaService.create(createIdea(defaultName)).test()
                 .expectSubscription()
                 .verifyError(ConflictKeyException::class.java)
+    }
+
+    @Test
+    fun `should not create idea cuz invalid bean`() {
+        ideaService.create(createIdea("")).test()
+                .expectSubscription()
+                .verifyError(ValidationException::class.java)
     }
 
     @Test
@@ -124,6 +132,11 @@ class IdeaServiceTest {
         ideaService.verifyNameAvailable(idea.name, ObjectId()).test()
                 .expectSubscription()
                 .verifyError(ConflictKeyException::class.java)
+    }
+
+    @Test
+    fun `should add member to empty team`() {
+
     }
 
 }

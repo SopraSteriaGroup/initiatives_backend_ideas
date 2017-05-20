@@ -2,7 +2,8 @@ package com.soprasteria.initiatives.ideas.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.soprasteria.initiatives.ideas.domain.IdeaProgress
-import com.soprasteria.initiatives.ideas.mapping.toDTO
+import com.soprasteria.initiatives.ideas.dto.MemberDTO
+import com.soprasteria.initiatives.ideas.mapping.toDetailDTO
 import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import com.soprasteria.initiatives.ideas.utils.createIdea
 import io.restassured.RestAssured
@@ -57,7 +58,7 @@ open class IdeasAPITests {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .filter(document("findAllIdeas", preprocessRequest(modifyUris().port(8080)), preprocessResponse(prettyPrint()),
                         responseFields(fieldWithPath("[]").description("An array of ideas"))
-                                .andWithPrefix("[].", fullIdeaDTO())))
+                                .andWithPrefix("[].", ideaDTOFieldsWithId())))
                 .`when`().get(baseUrl)
                 .then().statusCode(OK.value()).apply(validateMultipleIdeas())
     }
@@ -70,10 +71,8 @@ open class IdeasAPITests {
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .body(createIdeaRequestBody(name))
                 .filter(document("createIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
-                        requestFields(minIdeaDTOFields().apply {
-                            addAll(applyPathPrefix("contact.", listOf(mailField())))
-                        }),
-                        responseFields(fullIdeaDTO())))
+                        requestFields(minIdeaDTOFields()),
+                        responseFields(ideaDTOFieldsWithId())))
                 .`when`().post(baseUrl)
                 .then().statusCode(CREATED.value()).apply(validateSimpleIdea(name))
     }
@@ -101,27 +100,18 @@ open class IdeasAPITests {
     }
 
     @Test
-    fun `should not create new idea because mail not well formatted`() {
-        given(spec)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .body(createIdeaRequestBody("some name", "some mail"))
-                .`when`().post(baseUrl)
-                .then().statusCode(BAD_REQUEST.value()).apply { validateError(BAD_REQUEST) }
-    }
-
-    @Test
     fun `should update idea`() {
         val updatedName = "updated name"
         val idea = ideaRepository.findAll().blockFirst()
-        val updatedContact = idea.contact.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
+        val updatedContact = idea.contact?.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
         val updatedIdea = idea.copy(name = updatedName, likes = 10, progress = IdeaProgress.STARTED, contact = updatedContact)
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .body(updatedIdea.toDTO())
-                .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
-                        requestFields(fullIdeaDTO()), responseFields(fullIdeaDTO())))
+                .body(updatedIdea.toDetailDTO())
+//                .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+//                        requestFields(ideaDetailDTO()),
+//                        responseFields(ideaDetailDTO())))
                 .`when`().put("$baseUrl/{id}", idea.id.toString())
                 .then().statusCode(OK.value()).apply(validateUpdatedIdea(idea.name))
     }
@@ -133,7 +123,7 @@ open class IdeasAPITests {
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .body(ideas[0].toDTO())
+                .body(ideas[0].toDetailDTO())
                 .`when`().put("$baseUrl/{id}", ideas[1].id.toString())
                 .then().statusCode(CONFLICT.value())
     }
@@ -144,7 +134,7 @@ open class IdeasAPITests {
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .body(idea.copy(name = "").toDTO())
+                .body(idea.copy(name = "").toDetailDTO())
                 .`when`().put("$baseUrl/{id}", idea.id.toString())
                 .then().statusCode(BAD_REQUEST.value())
     }
@@ -158,11 +148,6 @@ open class IdeasAPITests {
             body("logo", equalTo("$name logo"))
             body("progress", equalTo(IdeaProgress.NOT_STARTED.name))
             body("likes", equalTo(0))
-            body("contact.mail", equalTo("jntakpe@mail.com"))
-            body("contact.slack", nullValue())
-            body("contact.github", nullValue())
-            body("contact.trello", nullValue())
-            body("contact.website", nullValue())
         }
     }
 
@@ -174,12 +159,17 @@ open class IdeasAPITests {
             body("category", equalTo("cat"))
             body("logo", equalTo("$oldName logo"))
             body("progress", equalTo(IdeaProgress.STARTED.name))
+            body("founder", notNullValue(MemberDTO::class.java))
+            body("founder.username", equalTo("default"))
+            body("founder.email", equalTo("default@mail.com"))
+            body("founder.firstName", equalTo("first name"))
+            body("founder.lastName", equalTo("last name"))
+            body("founder.avatar", equalTo("avatar"))
             body("likes", equalTo(10))
-            body("contact.mail", equalTo("jntakpe@mail.com"))
-            body("contact.slack", nullValue())
-            body("contact.github", equalTo("http://github.com/jntakpe"))
-            body("contact.trello", nullValue())
             body("contact.website", equalTo("updated.site.com"))
+            body("contact.github", equalTo("http://github.com/jntakpe"))
+            body("contact.slack", nullValue())
+            body("contact.trello", nullValue())
         }
     }
 
@@ -192,11 +182,6 @@ open class IdeasAPITests {
             body("logo", hasItems("$defaultName logo", "$defaultName 2 logo"))
             body("progress", hasItems(IdeaProgress.NOT_STARTED.name, IdeaProgress.NOT_STARTED.name))
             body("likes", hasItems(0, 0))
-            body("contact.mail", hasItems("jntakpe@mail.com", "jntakpe@mail.com"))
-            body("contact.slack", hasItems(nullValue(), nullValue()))
-            body("contact.github", hasItems(nullValue(), nullValue()))
-            body("contact.trello", hasItems(nullValue(), nullValue()))
-            body("contact.website", hasItems(nullValue(), nullValue()))
         }
     }
 
@@ -217,16 +202,39 @@ open class IdeasAPITests {
 
     private fun ideaDTOFields() = mutableListOf(
             fieldWithPath("progress").type(String::class.java).description("The idea's progress could be any value of type IdeaProgress"),
-            fieldWithPath("likes").type(Int::class.java).description("The idea's numbers of likes"),
-            fieldWithPath("contact").description("The idea's contact")
+            fieldWithPath("likes").type(Int::class.java).description("The idea's numbers of likes")
     ).apply { addAll(minIdeaDTOFields()) }
 
     private fun ideaDTOFieldsWithId() = mutableListOf(
             fieldWithPath("id").type(String::class.java).description("The idea's technical id generated by MongoDB"))
             .apply { addAll(ideaDTOFields()) }
 
+    private fun ideaDetailDTO(): MutableList<FieldDescriptor> {
+        return ideaDTOFieldsWithId()
+                .apply {
+                    addAll(applyPathPrefix("founder.", founderDTOFields()))
+                    addAll(applyPathPrefix("contact.", contactDTOFields()))
+                    add(fieldWithPath("members").description("An array of team members"))
+                }
+    }
+
+    private fun founderDTOFields() = mutableListOf(
+            fieldWithPath("username").type(String::class.java).description("The idea's founder username"),
+            fieldWithPath("email").type(String::class.java).description("The idea's founder email"),
+            fieldWithPath("firstName").type(String::class.java).description("The idea's founder first name"),
+            fieldWithPath("lastName").type(String::class.java).description("The idea's founder last name"),
+            fieldWithPath("avatar").type(String::class.java).optional().description("The idea's founder avatar")
+    )
+
+    private fun membersDTOFields() = mutableListOf(
+            fieldWithPath("username").type(String::class.java).description("An idea's team member username"),
+            fieldWithPath("email").type(String::class.java).description("An idea's team member email"),
+            fieldWithPath("firstName").type(String::class.java).description("An idea's team member first name"),
+            fieldWithPath("lastName").type(String::class.java).description("An idea's team member last name"),
+            fieldWithPath("avatar").type(String::class.java).optional().description("An idea's team member avatar")
+    )
+
     private fun contactDTOFields() = mutableListOf(
-            mailField(),
             fieldWithPath("website").type(String::class.java).description("The idea's website URL"),
             fieldWithPath("slack").type(String::class.java).description("The idea's slack URL"),
             fieldWithPath("github").type(String::class.java).description("The idea's github URL"),
@@ -239,18 +247,10 @@ open class IdeasAPITests {
             fieldWithPath("reason").type(String::class.java).description("The HTTP status reason")
     )
 
-    private fun fullIdeaDTO(): MutableList<FieldDescriptor> {
-        return ideaDTOFieldsWithId().apply {
-            addAll(applyPathPrefix("contact.", contactDTOFields()))
-        }
-    }
+    private fun createIdeaRequestBody(name: String) = ObjectMapper()
+            .writeValueAsString(IdeaDTOTest(name, "$name pitch", "cat", "$name logo"))
 
-    private fun mailField() = fieldWithPath("mail").type(String::class.java).description("The contact's mail address")
-
-    private fun createIdeaRequestBody(name: String, mail: String = "jntakpe@mail.com") = ObjectMapper().writeValueAsString(
-            IdeaDTOTest(name, "$name pitch", "cat", "$name logo", contact = ContactDTOTest(mail)))
-
-    data class IdeaDTOTest(val name: String, val pitch: String, val category: String, val logo: String, val contact: ContactDTOTest)
+    data class IdeaDTOTest(val name: String, val pitch: String, val category: String, val logo: String)
 
     data class ContactDTOTest(val mail: String)
 

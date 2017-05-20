@@ -16,7 +16,7 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
     val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
     fun findAll(): Flux<Idea> {
-        logger.debug("Searching all ideas")
+        listOf("Toto", "titi").map { }
         return ideaRepository.findAll()
                 .doOnNext { logger.debug("All ideas retrieved") }
     }
@@ -29,10 +29,10 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
     }
 
     fun update(idea: Idea, id: ObjectId): Mono<Idea> {
-        logger.info("Updating idea {}")
+        logger.info("Updating idea {}", idea)
         return verifyNameAvailable(idea.name, id)
                 .flatMap { ideaRepository.save(idea) }
-                .doOnNext { logger.info("Idea {} successfully updated", it.name) }
+                .doOnNext { logger.info("Idea {} successfully updated", it) }
     }
 
     fun verifyNameAvailable(name: String, id: ObjectId? = null): Mono<Boolean> {

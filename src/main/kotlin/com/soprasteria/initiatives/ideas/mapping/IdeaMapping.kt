@@ -2,15 +2,27 @@ package com.soprasteria.initiatives.ideas.mapping
 
 import com.soprasteria.initiatives.ideas.domain.Idea
 import com.soprasteria.initiatives.ideas.domain.IdeaContact
+import com.soprasteria.initiatives.ideas.domain.Member
 import com.soprasteria.initiatives.ideas.dto.IdeaContactDTO
 import com.soprasteria.initiatives.ideas.dto.IdeaDTO
+import com.soprasteria.initiatives.ideas.dto.IdeaDetailDTO
+import com.soprasteria.initiatives.ideas.dto.MemberDTO
 
-fun IdeaContactDTO.toContact() = IdeaContact(this.mail, this.website, this.slack, this.github, this.trello)
+fun IdeaContactDTO?.toContact() = IdeaContact(this?.website, this?.slack, this?.github, this?.trello)
 
-fun IdeaDTO.toIdea() = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
-        this.contact.toContact())
+fun IdeaDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
+        founder.toMember(), mutableListOf(), null)
 
-fun IdeaContact.toDTO() = IdeaContactDTO(this.mail, this.website, this.slack, this.github, this.trello)
+fun IdeaDetailDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress,
+        this.likes, founder.toMember(), mutableListOf(), this.contact.toContact())
 
-fun Idea.toDTO() = IdeaDTO(this.id.toString(), this.name, this.pitch, this.category, this.logo, this.contact.toDTO(), this.progress,
-        this.likes)
+fun MemberDTO.toMember() = Member(this.username, this.email, this.firstName, this.lastName, this.avatar)
+
+fun IdeaContact.toDTO() = IdeaContactDTO(this.website, this.slack, this.github, this.trello)
+
+fun Idea.toDTO() = IdeaDTO(this.id.toString(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes)
+
+fun Idea.toDetailDTO() = IdeaDetailDTO(this.id.toString(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
+        founder.toDTO(), members.map(Member::toDTO).toMutableList(), contact?.toDTO())
+
+fun Member.toDTO() = MemberDTO(this.username, this.email, this.firstName, this.lastName, this.avatar)

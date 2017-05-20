@@ -10,8 +10,11 @@ import com.mongodb.connection.netty.NettyStreamFactoryFactory
 import com.mongodb.reactivestreams.client.MongoClients
 import org.springframework.boot.autoconfigure.mongo.MongoProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
+import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener
+import javax.validation.Validator
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties::class)
@@ -22,6 +25,9 @@ class MongoDBConfig(val mongoProperties: MongoProperties, val profileConfig: Pro
     else MongoClients.create()
 
     override fun getDatabaseName() = mongoProperties.database
+
+    @Bean
+    fun validatingMongoEventListener(validator: Validator) = ValidatingMongoEventListener(validator)
 
     private fun settings() = MongoClientSettings.builder()
             .sslSettings(SslSettings.builder()
