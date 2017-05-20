@@ -13,8 +13,8 @@ fun IdeaContactDTO.toContact() = IdeaContact(this.website, this.slack, this.gith
 fun IdeaDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress, this.likes,
         founder.toMember(), mutableListOf())
 
-fun IdeaDetailDTO.toIdea(founder: MemberDTO) = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress,
-        this.likes, founder.toMember(), mutableListOf(), this.contact.toContact())
+fun IdeaDetailDTO.toIdea() = Idea(this.id.toId(), this.name, this.pitch, this.category, this.logo, this.progress,
+        this.likes, founder.toMember(), this.members.map { it.toMember() }.toMutableList(), this.contact.toContact())
 
 fun MemberDTO.toMember() = Member(this.username, this.email, this.firstName, this.lastName, this.avatar)
 

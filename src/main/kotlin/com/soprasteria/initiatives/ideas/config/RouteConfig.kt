@@ -19,6 +19,7 @@ class RouteConfig {
                 GET("/", ideasAPI::findAll)
                 POST("/", ideasAPI::create)
                 PUT("/{id}", ideasAPI::update)
+                POST("/{id}/join", ideasAPI::join)
             }
         }
     }

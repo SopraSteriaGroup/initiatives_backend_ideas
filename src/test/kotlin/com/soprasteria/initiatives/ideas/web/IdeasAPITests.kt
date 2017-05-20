@@ -1,11 +1,14 @@
 package com.soprasteria.initiatives.ideas.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.soprasteria.initiatives.ideas.domain.IdeaProgress
+import com.soprasteria.initiatives.ideas.domain.IdeaProgress.NOT_STARTED
+import com.soprasteria.initiatives.ideas.domain.IdeaProgress.STARTED
+import com.soprasteria.initiatives.ideas.dto.IdeaDetailDTO
 import com.soprasteria.initiatives.ideas.dto.MemberDTO
 import com.soprasteria.initiatives.ideas.mapping.toDetailDTO
 import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import com.soprasteria.initiatives.ideas.utils.createIdea
+import com.soprasteria.initiatives.ideas.utils.createMember
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
@@ -103,15 +106,16 @@ open class IdeasAPITests {
     fun `should update idea`() {
         val updatedName = "updated name"
         val idea = ideaRepository.findAll().blockFirst()
-        val updatedContact = idea.contact?.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
-        val updatedIdea = idea.copy(name = updatedName, likes = 10, progress = IdeaProgress.STARTED, contact = updatedContact)
+        val updatedContact = idea.contact.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
+        val members = mutableListOf(createMember("titi"), createMember("tata"))
+        val updatedIdea = idea.copy(name = updatedName, likes = 10, progress = STARTED, contact = updatedContact, members = members)
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .body(updatedIdea.toDetailDTO())
-//                .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
-//                        requestFields(ideaDetailDTO()),
-//                        responseFields(ideaDetailDTO())))
+                .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        requestFields(ideaDetailDTO()),
+                        responseFields(ideaDetailDTO())))
                 .`when`().put("$baseUrl/{id}", idea.id.toString())
                 .then().statusCode(OK.value()).apply(validateUpdatedIdea(idea.name))
     }
@@ -139,6 +143,18 @@ open class IdeasAPITests {
                 .then().statusCode(BAD_REQUEST.value())
     }
 
+    @Test
+    fun `should join team`() {
+        val idea = ideaRepository.findAll().blockFirst()
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .filter(document("joinIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        responseFields(ideaDetailDTO())))
+                .`when`().post("$baseUrl/{id}/join", idea.id.toString())
+                .then().statusCode(OK.value()).apply(validateDetailedIdea(idea.toDetailDTO()))
+    }
+
     private fun validateSimpleIdea(name: String): ValidatableResponse.() -> Unit {
         return {
             body("id", notNullValue())
@@ -146,7 +162,7 @@ open class IdeasAPITests {
             body("pitch", equalTo("$name pitch"))
             body("category", equalTo("cat"))
             body("logo", equalTo("$name logo"))
-            body("progress", equalTo(IdeaProgress.NOT_STARTED.name))
+            body("progress", equalTo(NOT_STARTED.name))
             body("likes", equalTo(0))
         }
     }
@@ -158,18 +174,41 @@ open class IdeasAPITests {
             body("pitch", equalTo("$oldName pitch"))
             body("category", equalTo("cat"))
             body("logo", equalTo("$oldName logo"))
-            body("progress", equalTo(IdeaProgress.STARTED.name))
+            body("progress", equalTo(STARTED.name))
             body("founder", notNullValue(MemberDTO::class.java))
-            body("founder.username", equalTo("default"))
-            body("founder.email", equalTo("default@mail.com"))
-            body("founder.firstName", equalTo("first name"))
-            body("founder.lastName", equalTo("last name"))
-            body("founder.avatar", equalTo("avatar"))
+            body("founder.username", equalTo("toto"))
+            body("founder.email", equalTo("toto@mail.com"))
+            body("founder.firstName", equalTo("toto firstName"))
+            body("founder.lastName", equalTo("toto lastName"))
+            body("founder.avatar", equalTo("toto avatar"))
+            body("members.username", hasItems("titi", "tata"))
             body("likes", equalTo(10))
             body("contact.website", equalTo("updated.site.com"))
             body("contact.github", equalTo("http://github.com/jntakpe"))
             body("contact.slack", nullValue())
             body("contact.trello", nullValue())
+        }
+    }
+
+    private fun validateDetailedIdea(idea: IdeaDetailDTO): ValidatableResponse.() -> Unit {
+        return {
+            body("id", notNullValue())
+            body("name", equalTo(idea.name))
+            body("pitch", equalTo(idea.pitch))
+            body("category", equalTo(idea.category))
+            body("logo", equalTo(idea.logo))
+            body("progress", equalTo(idea.progress.name))
+            body("founder", notNullValue(MemberDTO::class.java))
+            body("founder.username", equalTo(idea.founder.username))
+            body("founder.email", equalTo(idea.founder.email))
+            body("founder.firstName", equalTo(idea.founder.firstName))
+            body("founder.lastName", equalTo(idea.founder.lastName))
+            body("founder.avatar", equalTo(idea.founder.avatar))
+            body("likes", equalTo(idea.likes))
+            body("contact.website", equalTo(idea.contact.website))
+            body("contact.github", equalTo(idea.contact.github))
+            body("contact.slack", equalTo(idea.contact.slack))
+            body("contact.trello", equalTo(idea.contact.trello))
         }
     }
 
@@ -180,7 +219,7 @@ open class IdeasAPITests {
             body("pitch", hasItems("$defaultName pitch", "$defaultName 2 pitch"))
             body("category", hasItems("cat", "cat"))
             body("logo", hasItems("$defaultName logo", "$defaultName 2 logo"))
-            body("progress", hasItems(IdeaProgress.NOT_STARTED.name, IdeaProgress.NOT_STARTED.name))
+            body("progress", hasItems(NOT_STARTED.name, NOT_STARTED.name))
             body("likes", hasItems(0, 0))
         }
     }
@@ -215,6 +254,7 @@ open class IdeasAPITests {
                     addAll(applyPathPrefix("founder.", founderDTOFields()))
                     addAll(applyPathPrefix("contact.", contactDTOFields()))
                     add(fieldWithPath("members").description("An array of team members"))
+                    addAll(applyPathPrefix("members[].", membersDTOFields()))
                 }
     }
 

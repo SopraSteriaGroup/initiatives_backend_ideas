@@ -1,6 +1,7 @@
 package com.soprasteria.initiatives.ideas.service
 
 import com.soprasteria.initiatives.ideas.domain.Idea
+import com.soprasteria.initiatives.ideas.domain.Member
 import com.soprasteria.initiatives.ideas.exceptions.ConflictKeyException
 import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import org.bson.types.ObjectId
@@ -42,6 +43,14 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
                 .flatMap { ConflictKeyException("Name $name is not available").toMono<Boolean>() }
                 .defaultIfEmpty(true)
                 .doOnNext { logger.debug("Name {} is available", name) }
+    }
+
+    fun join(ideaId: ObjectId, member: Member): Mono<Idea> {
+        logger.info("Adding member {} to idea with id {}", member, ideaId)
+        return ideaRepository.findById(ideaId)
+                .map { it.apply { members.add(member) } }
+                .flatMap { update(it, it.id) }
+                .doOnNext { logger.info("Member {} has joined team {}", member, it) }
     }
 
     private fun findByName(name: String): Mono<Idea> {

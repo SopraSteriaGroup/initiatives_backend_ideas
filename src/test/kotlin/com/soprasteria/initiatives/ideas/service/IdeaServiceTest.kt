@@ -3,6 +3,7 @@ package com.soprasteria.initiatives.ideas.service
 import com.soprasteria.initiatives.ideas.exceptions.ConflictKeyException
 import com.soprasteria.initiatives.ideas.repository.IdeaRepository
 import com.soprasteria.initiatives.ideas.utils.createIdea
+import com.soprasteria.initiatives.ideas.utils.createMember
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.Before
@@ -136,7 +137,33 @@ class IdeaServiceTest {
 
     @Test
     fun `should add member to empty team`() {
+        val idea = ideaRepository.findAll().blockFirst()
+        assertThat(idea.members).isEmpty()
+        val username = "titi"
+        ideaService.join(idea.id, createMember(username)).test()
+                .expectSubscription()
+                .consumeNextWith {
+                    assertThat(it).isNotNull()
+                    assertThat(it.members).isNotEmpty
+                    assertThat(it.members[0].username).isEqualTo(username)
+                }
+                .verifyComplete()
+    }
 
+    @Test
+    fun `should add member to existing team`() {
+        val ideaWithMembers = createIdea("with members").apply { members.addAll(listOf(createMember("tata"), createMember("titi"))) }
+        val ideaId = ideaRepository.insert(ideaWithMembers).block().id
+        val username = "new member"
+        ideaService.join(ideaId, createMember(username)).test()
+                .expectSubscription()
+                .consumeNextWith {
+                    assertThat(it).isNotNull()
+                    assertThat(it.members).isNotEmpty
+                    assertThat(it.members).hasSize(3)
+                    assertThat(it.members.map { it.username }).contains("new member")
+                }
+                .verifyComplete()
     }
 
 }
