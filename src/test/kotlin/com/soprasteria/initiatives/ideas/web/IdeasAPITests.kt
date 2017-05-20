@@ -30,6 +30,8 @@ import org.springframework.restdocs.JUnitRestDocumentation
 import org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import org.springframework.restdocs.request.RequestDocumentation.pathParameters
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.document
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
 import org.springframework.restdocs.restassured3.operation.preprocess.RestAssuredPreprocessors.modifyUris
@@ -114,6 +116,7 @@ open class IdeasAPITests {
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .body(updatedIdea.toDetailDTO())
                 .filter(document("updateIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The idea identifier")),
                         requestFields(ideaDetailDTO()),
                         responseFields(ideaDetailDTO())))
                 .`when`().put("$baseUrl/{id}", idea.id.toString())
@@ -150,6 +153,7 @@ open class IdeasAPITests {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .filter(document("joinIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The idea identifier")),
                         responseFields(ideaDetailDTO())))
                 .`when`().post("$baseUrl/{id}/join", idea.id.toString())
                 .then().statusCode(OK.value()).apply(validateDetailedIdea(idea.toDetailDTO()))

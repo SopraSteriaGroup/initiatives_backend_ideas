@@ -54,6 +54,10 @@ include::{snippets}/createIdea/http-response.adoc[]
 
  A `PUT` request including the idea's id within path and with a body containing the idea to update will return the updated idea
 
+==== Path parameters
+
+include::{snippets}/updateIdea/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/updateIdea/request-fields.adoc[]
@@ -73,3 +77,28 @@ include::{snippets}/updateIdea/response-fields.adoc[]
 ==== Example response
 
 include::{snippets}/updateIdea/http-response.adoc[]
+
+[[ideas-join]]
+=== Join idea
+
+ A `POST` request including the idea's id within path will add connected user to members list and return the detailed idea
+
+==== Path parameters
+
+include::{snippets}/updateIdea/path-parameters.adoc[]
+
+==== Example request
+
+include::{snippets}/joinIdea/curl-request.adoc[]
+
+or
+
+include::{snippets}/joinIdea/http-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/joinIdea/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/joinIdea/http-response.adoc[]
