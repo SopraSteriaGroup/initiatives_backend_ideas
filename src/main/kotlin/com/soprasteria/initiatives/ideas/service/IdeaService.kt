@@ -47,12 +47,19 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
                 .doOnNext { logger.debug("Name {} is available", name) }
     }
 
-    fun join(ideaId: ObjectId, member: Member): Mono<Idea> {
-        logger.info("Adding member {} to idea with id {}", member, ideaId)
-        return ideaRepository.findById(ideaId)
+    fun join(id: ObjectId, member: Member): Mono<Idea> {
+        logger.info("Adding member {} to idea with id {}", member, id)
+        return ideaRepository.findById(id)
                 .map { it.apply { members.add(member) } }
                 .flatMap { update(it, it.id) }
                 .doOnNext { logger.info("Member {} has joined team {}", member, it) }
+    }
+
+    fun like(id: ObjectId, username: String): Mono<Idea> {
+        return findById(id)
+                .doOnNext { logger.debug("User {} liking idea {}", username, it) }
+                .map { it.apply { likes.add(username) } }
+                .flatMap { ideaRepository.save(it) }
     }
 
     private fun findLikes(id: ObjectId): Mono<MutableList<String>> {

@@ -182,4 +182,17 @@ class IdeaServiceTest {
                 .verifyComplete()
     }
 
+    @Test
+    fun `should add like to idea`() {
+        val idea = ideaRepository.findAll().blockFirst()
+        val likerUsername = "cool guy"
+        ideaService.like(idea.id, likerUsername).test()
+                .expectSubscription()
+                .consumeNextWith {
+                    assertThat(it.likes).contains(likerUsername)
+                    assertThat(it.likes.size).isEqualTo(idea.likes.size + 1)
+                }
+                .verifyComplete()
+    }
+
 }
