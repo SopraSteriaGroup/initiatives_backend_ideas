@@ -81,11 +81,11 @@ include::{snippets}/updateIdea/http-response.adoc[]
 [[ideas-join]]
 === Join idea
 
- A `POST` request including the idea's id within path will add connected user to members list and return the detailed idea
+ A `POST` request including the idea's id within path with '/join' suffix will add connected user to members list and return the detailed idea
 
 ==== Path parameters
 
-include::{snippets}/updateIdea/path-parameters.adoc[]
+include::{snippets}/joinIdea/path-parameters.adoc[]
 
 ==== Example request
 
@@ -102,3 +102,28 @@ include::{snippets}/joinIdea/response-fields.adoc[]
 ==== Example response
 
 include::{snippets}/joinIdea/http-response.adoc[]
+
+[[ideas-like]]
+=== Like idea
+
+ A `POST` request including the idea's id within path with '/like' will add a like to the idea and return the detailed idea
+
+==== Path parameters
+
+include::{snippets}/likeIdea/path-parameters.adoc[]
+
+==== Example request
+
+include::{snippets}/likeIdea/curl-request.adoc[]
+
+or
+
+include::{snippets}/likeIdea/http-request.adoc[]
+
+==== Response structure
+
+include::{snippets}/likeIdea/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/likeIdea/http-response.adoc[]

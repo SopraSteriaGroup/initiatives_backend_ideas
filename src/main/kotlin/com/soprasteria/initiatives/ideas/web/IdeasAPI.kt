@@ -20,7 +20,7 @@ class IdeasAPI(private val ideaService: IdeaService, private val validator: Vali
 
     fun create(req: ServerRequest) = req.bodyToMono<IdeaDTO>()
             .flatMap { validator.toMono(it) }
-            .map { it.toIdea(createFakeMember()) }
+            .map { it.toIdea(connectedUser()) }
             .flatMap { ideaService.create(it) }
             .map { it.toDTO() }
             .flatMap { created(req.uri().resolve("${req.path()}/${it.id}")).syncBody(it) }
@@ -34,12 +34,17 @@ class IdeasAPI(private val ideaService: IdeaService, private val validator: Vali
             .flatMap { ok().syncBody(it) }
             .onErrorResume { it.toResponse() }
 
-    fun join(req: ServerRequest) = ideaService.join(idFromPath(req), createFakeMember().toMember())
+    fun join(req: ServerRequest) = ideaService.join(idFromPath(req), connectedUser().toMember())
             .map { it.toDetailDTO() }
             .flatMap { ok().syncBody(it) }
             .onErrorResume { it.toResponse() }
 
-    private fun createFakeMember() = MemberDTO("default", "default@mail.com", "first name", "last name", "avatar") //TODO resolve real user
+    fun like(req: ServerRequest) = ideaService.like(idFromPath(req), connectedUser().username)
+            .map { it.toDetailDTO() }
+            .flatMap { ok().syncBody(it) }
+            .onErrorResume { it.toResponse() }
+
+    private fun connectedUser() = MemberDTO("default", "default@mail.com", "first name", "last name", "avatar") //TODO resolve real user
 
     private fun idFromPath(req: ServerRequest) = req.pathVariable("id").toId()
 

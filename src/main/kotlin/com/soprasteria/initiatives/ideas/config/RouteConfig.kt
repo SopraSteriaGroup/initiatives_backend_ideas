@@ -20,6 +20,7 @@ class RouteConfig {
                 POST("/", ideasAPI::create)
                 PUT("/{id}", ideasAPI::update)
                 POST("/{id}/join", ideasAPI::join)
+                POST("/{id}/like", ideasAPI::like)
             }
         }
     }

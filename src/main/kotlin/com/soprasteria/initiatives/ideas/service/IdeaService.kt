@@ -57,9 +57,10 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
 
     fun like(id: ObjectId, username: String): Mono<Idea> {
         return findById(id)
-                .doOnNext { logger.debug("User {} liking idea {}", username, it) }
+                .doOnNext { logger.info("User {} liking idea {}", username, it) }
                 .map { it.apply { likes.add(username) } }
                 .flatMap { ideaRepository.save(it) }
+                .doOnNext { logger.info("User {} like added to idea {}", username, it) }
     }
 
     private fun findLikes(id: ObjectId): Mono<MutableList<String>> {

@@ -162,6 +162,22 @@ open class IdeasAPITests {
                 .then().statusCode(OK.value()).apply(validateDetailedIdea(idea.toDetailDTO()))
     }
 
+    @Test
+    fun `should like idea`() {
+        val idea = ideaRepository.findAll().take(1)
+                .map { it.copy(members = mutableListOf(createMember("titi"))) }
+                .flatMap { ideaRepository.save(it) }
+                .blockFirst()
+        given(spec)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .filter(document("likeIdea", preprocessRequest(modifyUris().port(8080), prettyPrint()), preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The idea identifier")),
+                        responseFields(ideaDetailDTO())))
+                .`when`().post("$baseUrl/{id}/like", idea.id.toString())
+                .then().statusCode(OK.value()).apply(validateDetailedIdea(idea.toDetailDTO(), idea.likes.size + 1))
+    }
+
     private fun validateSimpleIdea(name: String): ValidatableResponse.() -> Unit {
         return {
             body("id", notNullValue())
@@ -197,7 +213,7 @@ open class IdeasAPITests {
         }
     }
 
-    private fun validateDetailedIdea(idea: IdeaDetailDTO): ValidatableResponse.() -> Unit {
+    private fun validateDetailedIdea(idea: IdeaDetailDTO, likes: Int = idea.likes): ValidatableResponse.() -> Unit {
         return {
             body("id", notNullValue())
             body("name", equalTo(idea.name))
@@ -211,7 +227,7 @@ open class IdeasAPITests {
             body("founder.firstName", equalTo(idea.founder.firstName))
             body("founder.lastName", equalTo(idea.founder.lastName))
             body("founder.avatar", equalTo(idea.founder.avatar))
-            body("likes", equalTo(idea.likes))
+            body("likes", equalTo(likes))
             body("contact.website", equalTo(idea.contact.website))
             body("contact.github", equalTo(idea.contact.github))
             body("contact.slack", equalTo(idea.contact.slack))
