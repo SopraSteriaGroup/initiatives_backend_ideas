@@ -32,7 +32,9 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
     fun update(idea: Idea, id: ObjectId): Mono<Idea> {
         logger.info("Updating idea {}", idea)
         return verifyNameAvailable(idea.name, id)
-                .flatMap { ideaRepository.save(idea) }
+                .flatMap { findLikes(id) }
+                .map { idea.copy(likes = it) }
+                .flatMap { ideaRepository.save(it) }
                 .doOnNext { logger.info("Idea {} successfully updated", it) }
     }
 
@@ -51,6 +53,19 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
                 .map { it.apply { members.add(member) } }
                 .flatMap { update(it, it.id) }
                 .doOnNext { logger.info("Member {} has joined team {}", member, it) }
+    }
+
+    private fun findLikes(id: ObjectId): Mono<MutableList<String>> {
+        logger.debug("Searching members with id {}", id)
+        return findById(id)
+                .doOnNext { logger.debug("Found {} members liking idea {}", it.likes.size, it) }
+                .map { it.likes }
+    }
+
+    private fun findById(id: ObjectId): Mono<Idea> {
+        logger.debug("Searching idea with id {}", id)
+        return ideaRepository.findById(id)
+                .doOnNext { logger.debug("Idea {} retrieved with id {}", it, id) }
     }
 
     private fun findByName(name: String): Mono<Idea> {

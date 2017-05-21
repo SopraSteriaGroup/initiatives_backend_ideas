@@ -11,10 +11,10 @@ data class Idea(val id: ObjectId,
                 @field:NotBlank val category: String, //TODO to become DBRef or embedded object
                 val logo: String,
                 val progress: IdeaProgress,
-                val likes: Int,
                 val founder: Member,
-                val members: MutableList<Member>,
-                val contact: IdeaContact = IdeaContact(null, null, null, null)) {
+                val members: MutableList<Member> = mutableListOf(),
+                val contact: IdeaContact = IdeaContact(null, null, null, null),
+                val likes: MutableList<String> = mutableListOf()) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -26,4 +26,7 @@ data class Idea(val id: ObjectId,
         return name.hashCode()
     }
 
+    override fun toString(): String {
+        return "Idea(id=$id, name=$name, founder=$founder)"
+    }
 }

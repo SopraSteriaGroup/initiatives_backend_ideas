@@ -107,10 +107,13 @@ open class IdeasAPITests {
     @Test
     fun `should update idea`() {
         val updatedName = "updated name"
-        val idea = ideaRepository.findAll().blockFirst()
+        val idea = ideaRepository.findAll().take(1)
+                .map { it.copy(likes = mutableListOf("toto", "titi", "tata")) }
+                .flatMap { ideaRepository.save(it) }
+                .blockFirst()
         val updatedContact = idea.contact.copy(website = "updated.site.com", github = "http://github.com/jntakpe")
         val members = mutableListOf(createMember("titi"), createMember("tata"))
-        val updatedIdea = idea.copy(name = updatedName, likes = 10, progress = STARTED, contact = updatedContact, members = members)
+        val updatedIdea = idea.copy(name = updatedName, progress = STARTED, contact = updatedContact, members = members)
         given(spec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -186,7 +189,7 @@ open class IdeasAPITests {
             body("founder.lastName", equalTo("toto lastName"))
             body("founder.avatar", equalTo("toto avatar"))
             body("members.username", hasItems("titi", "tata"))
-            body("likes", equalTo(10))
+            body("likes", equalTo(3))
             body("contact.website", equalTo("updated.site.com"))
             body("contact.github", equalTo("http://github.com/jntakpe"))
             body("contact.slack", nullValue())

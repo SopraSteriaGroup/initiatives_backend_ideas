@@ -77,6 +77,22 @@ class IdeaServiceTest {
     }
 
     @Test
+    fun `should update preserving likes`() {
+        val oldIdea = ideaRepository.findAll().take(1)
+                .map { it.copy(likes = mutableListOf("toto", "tata", "titi")) }
+                .flatMap { ideaRepository.save(it) }
+                .blockFirst()
+        val updatedName = "updated name"
+        ideaService.update(oldIdea.copy(name = updatedName), oldIdea.id).test()
+                .expectSubscription()
+                .consumeNextWith {
+                    assertThat(it.name).isEqualTo(updatedName)
+                    assertThat(it.likes).hasSize(3).contains("toto", "titi", "tata")
+                }
+                .verifyComplete()
+    }
+
+    @Test
     fun `should update idea when duplicate name but same id`() {
         val first = ideaRepository.findAll().blockFirst()
         val updatedPitch = "updated pitch"

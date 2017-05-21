@@ -42,7 +42,7 @@ class IdeaMappingTests {
         assertThat(idea.category).isEqualTo(category)
         assertThat(idea.logo).isEqualTo(logo)
         assertThat(idea.progress).isEqualTo(IdeaProgress.NOT_STARTED)
-        assertThat(idea.likes).isEqualTo(0)
+        assertThat(idea.likes).isEmpty()
         assertThat(idea.founder).isNotNull()
         assertThat(idea.contact).isNotNull()
     }
@@ -83,9 +83,9 @@ class IdeaMappingTests {
         val category = "category"
         val logo = "logo"
         val progress = IdeaProgress.STARTED
-        val likes = 5
+        val likes = mutableListOf("toto", "titi", "tata")
         val contact = IdeaContact(null, null, null, null)
-        val dto = Idea(ObjectId(), name, pitch, category, logo, progress, likes, createMember("founder"), mutableListOf(), contact).toDTO()
+        val dto = Idea(ObjectId(), name, pitch, category, logo, progress, createMember("founder"), mutableListOf(), contact, likes).toDTO()
         assertThat(dto).isNotNull()
         assertThat(dto.id).isNotNull()
         assertThat(dto.name).isEqualTo(name)
@@ -93,7 +93,7 @@ class IdeaMappingTests {
         assertThat(dto.category).isEqualTo(category)
         assertThat(dto.logo).isEqualTo(logo)
         assertThat(dto.progress).isEqualTo(progress)
-        assertThat(dto.likes).isEqualTo(likes)
+        assertThat(dto.likes).isEqualTo(likes.size)
     }
 
     @Test
