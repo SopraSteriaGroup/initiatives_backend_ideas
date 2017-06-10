@@ -8,9 +8,7 @@ services:
   initiatives-ideas:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    build:
-      dockerfile: ./src/main/docker/Dockerfile
-      context: .
+    image: ${REPO}/ssg/initiatives_backend_ideas:${TAG_INITIATIVES_BACKEND}
     ports:
       - 8080:8080
     links:
