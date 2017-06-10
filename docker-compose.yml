@@ -8,8 +8,22 @@ services:
   initiatives-ideas:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    image: ${REPO}/ssg/initiatives_backend_ideas:${TAG_INITIATIVES_BACKEND}
+    image: ${REPO}/ssg/initiatives_backend_ideas:${TAG_INITIATIVES_BACKEND_IDEAS}
     ports:
       - 8080:8080
     links:
       - mongodb
+  smtp-server:
+    image: djfarrelly/maildev
+    ports:
+      - 25:25
+      - 1080:80
+  initiatives-backend:
+    image: ${REPO}/ssg/initiatives_backend_auth:${TAG_INITIATIVES_BACKEND_AUTH}
+    ports:
+      - 8181:8080
+    links:
+      - mongodb
+      - smtp-server
+    environment:
+     - SPRING_PROFILES_ACTIVE=bouchon, docker
