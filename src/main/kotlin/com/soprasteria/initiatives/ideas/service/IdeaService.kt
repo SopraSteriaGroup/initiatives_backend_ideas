@@ -17,7 +17,6 @@ class IdeaService(private val ideaRepository: IdeaRepository) {
     val logger = LoggerFactory.getLogger(javaClass.simpleName)
 
     fun findAll(): Flux<Idea> {
-        listOf("Toto", "titi").map { }
         return ideaRepository.findAll()
                 .doOnNext { logger.debug("All ideas retrieved") }
     }

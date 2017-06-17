@@ -4,14 +4,15 @@
 
     <logger name="com.soprasteria.initiatives.ideas" level="TRACE"/>
     <logger name="javax" level="WARN"/>
-    <logger name="io.netty" level="WARN"/>
+    <logger name="sun.rmi" level="WARN"/>
+    <logger name="org.apache" level="WARN"/>
     <logger name="reactor" level="WARN"/>
     <logger name="org.mongodb" level="WARN"/>
     <logger name="org.jboss.logging" level="WARN"/>
     <logger name="org.hibernate.validator" level="WARN"/>
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.boot" level="WARN"/>
-    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.springframework.security" level="WARN"/>
 
     <root level="TRACE">

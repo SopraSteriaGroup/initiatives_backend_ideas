@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType
@@ -36,6 +37,7 @@ import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.do
 import org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
 import org.springframework.restdocs.restassured3.operation.preprocess.RestAssuredPreprocessors.modifyUris
 import org.springframework.test.context.junit4.SpringRunner
+
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -54,7 +56,11 @@ open class IdeasAPITests {
         ideaRepository.insert(createIdea(defaultName)).block()
         ideaRepository.insert(createIdea("$defaultName 2")).block()
         RestAssured.port = port
-        spec = RequestSpecBuilder().addFilter(documentationConfiguration(restDocumentation)).build()
+        spec = RequestSpecBuilder()
+                //TODO change this
+                .addHeader(HttpHeaders.AUTHORIZATION, "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXJzdE5hbWUiOiJjaGFybGVzIiwibGFzdE5hbWUiOiJnaXJhdWQiLCJ1c2VyX25hbWUiOiJjaGFybGVzLWVyaWMuZ2lyYXVkMkBzb3ByYXN0ZXJpYS5jb20iLCJzY29wZSI6WyJvcGVuaWQiXSwiZXhwIjoxNTk3NjUzNjMwLCJqdGkiOiJmMDgxODU4YS0zYjQxLTRhOGEtOGQ3Zi1hYmQ5NmQxNGQ3NTgiLCJjbGllbnRfaWQiOiJpbml0aWF0aXZlc19hcHAifQ.EEoZiPolHfG7gJtvMQVvJf5Tpqzz9IWGBWgUfCXpc9eNaeEKs3_9ktKEcAPO0oF8bVbn1FgAAKHIlIQ6bcm7ZdjWG1ZD6oxnsO77v5KhW3AJs5NjjxNES5b1m9qXn8OlwXJondg3vzyQ45JJkfWAN5w-6Mu7L0fWgS2NQjQpMjJf4JeofoDYDZuilSKUbsn4ZYL8DrROZ-PXjAkP8Y8fXPd-2OfpWy4v_t-TGYaDKFlu_xs09hDuASKv3p8N6ot_hDVeSH7nIr0oKkePgpfQpbFdDmgvUiuOdYwOx4kXSCZiFEsa-hXbLe4qhCZLIP0NeMWGqUchxjFxMQorXRXsDQ")
+                .addFilter(documentationConfiguration(restDocumentation))
+                .build()
     }
 
     @Test

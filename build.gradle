@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		kotlinVersion = '1.1.2'
+		kotlinVersion = '1.1.2-5'
 		springBootVersion = '2.0.0.BUILD-SNAPSHOT'
 		jacksonVersion = '2.8.8'
 		reactorVersion = '3.1.0.BUILD-SNAPSHOT'
@@ -70,12 +70,18 @@ repositories {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("org.springframework.security.oauth:spring-security-oauth2")
+    compile("org.springframework.security:spring-security-jwt")
+    compile("org.springframework.boot:spring-boot-starter-security")
+	compile('org.springframework.boot:spring-boot-starter-web')
 	compile("io.projectreactor:reactor-kotlin-extensions:${reactorKotlinVersion}")
 	compile("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
 	compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
 	compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 	compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	compile("org.springframework.security:spring-security-crypto:3.1.0.RELEASE")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('org.springframework.security:spring-security-test')
 	testCompile("io.projectreactor.addons:reactor-test:${reactorVersion}")
 	testCompile("io.rest-assured:rest-assured:${restAssuredVersion}")
 	testCompile("org.springframework.restdocs:spring-restdocs-restassured:${springRestDocsVersion}")

@@ -4,3 +4,12 @@ spring:
   data:
     mongodb:
       database: initiatives_ideas_test
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        keyValue: |
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA04oHvREfP2YxamN5CcwasVsJe1N0Kg5THUaziTLEBESU9zXT2OiMQEtPCOmgS8ophZd/eYUK8CIaYVnGafZdE0snKalpPPKeAlp5bKuwgTRQl6galArMm53I7sjgZjcDRu8MGX1/OW9yZJRapBXdyFCnQlEJrZJLIuesqNmpV8NsUDs0gHYu4GuuWNwB+jRrOagoSNHgSZqpi2dJBmZjCNvycqNAwy2qRRl16Pb5MxeuBV+6O5ObwqrxcFFTa0waBHz3wmPbDc75JrN3KQXT3Flj7FBbZdIOX4gornPgJ+phw/aQcYVEdqbmzpCibkf9y66QFIQgN4jaNeTyonVwvwIDAQAB
+          -----END PUBLIC KEY-----
